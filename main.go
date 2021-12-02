@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -34,8 +35,24 @@ func execInput(input string) error {
 	// Remove the newline character
 	input = strings.TrimSuffix(input, "\n")
 
+	// Split the input into commands and args
+	args := strings.Split(input, " ")
+
+	// Check for built-in commands
+	switch args[0] {
+	case "cd":
+		// 'cd' to home dir with empty path not yet supported.
+		if len(args) < 2 {
+			return errors.New("path required")
+		}
+		// Change the directory and return the error
+		return os.Chdir(args[1])
+	case "exit":
+		os.Exit(0)
+	}
+
 	// Prepare the command to execute
-	cmd := exec.Command(input)
+	cmd := exec.Command(args[0], args[1:]...)
 
 	// Set the correct output device
 	cmd.Stdout = os.Stdout
@@ -66,3 +83,10 @@ func execInput(input string) error {
 // 	// Print the output
 // 	fmt.Printf("%s\n", out.String())
 // }
+
+//-------------------Targets------------------------------------
+// Modify the input indicator:
+// add the working directory
+// add the machine’s hostname
+// add the current user
+// Browse your input history with the up/down keys
