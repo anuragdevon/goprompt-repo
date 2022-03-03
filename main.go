@@ -3,12 +3,25 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func main() {
+	// If the file doesn't exist, create it, or append to the file
+	f, err := os.OpenFile("gash_history.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
 	// disable input buffering
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 
@@ -23,28 +36,34 @@ func main() {
 			fmt.Println(err)
 		}
 		path = strings.Replace(string(path), "/home/anurag", "~", 1)
-		fmt.Print(path, "-> ")
+		fmt.Print(path, " > ")
 		os.Stdin.Read(b)
 		if string(b) == string(byte(27)) {
 			os.Stdin.Read(c)
 			os.Stdin.Read(d)
 			if string(c) == string(byte(91)) {
 				if string(d) == string(byte(65)) {
+					a := 1
+					a += 1
 					fmt.Println("READ HISTORY")
 				} else if string(d) == string(byte(66)) {
 					fmt.Println("READ LATEST")
+					b := 1
+					b += 1
 				}
 			}
 		} else {
 			fmt.Print(string(b))
+
 			// Enable chacter display on screen
 			exec.Command("stty", "-F", "/dev/tty", "echo").Run()
 			reader := bufio.NewReader(os.Stdin)
 			input, err := reader.ReadString('\n')
+			check(err)
 			input = string(b) + input
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
+
+			_, errW := f.WriteString(input)
+			check(errW)
 
 			if err = execInput(input); err != nil {
 				fmt.Fprintln(os.Stderr, err)
@@ -79,74 +98,6 @@ func execInput(input string) error {
 
 	return cmd.Run()
 }
-
-// func main() {
-// 	// disable input buffering
-// 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-// 	// do not display entered characters on the screen
-// 	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-
-// 	var b []byte = make([]byte, 1)
-// 	i := 0
-// 	bufferInput := ""
-// 	for {
-// 		// if i == 3 {
-// 		// 	break
-// 		// }
-// 		i += 1
-// 		os.Stdin.Read(b)
-// 		bufferInput += string(b)
-// 		// os.Exit(1)
-// 		fmt.Println("OLD COMMANDS: ", string(b))
-// 	}
-// 	// [[A
-// 	// [[B
-// 	// fmt.Println("TOTAL")
-// 	// fmt.Println("TOTAL:", bufferInput)
-// }
-
-// installBreak()
-
-// func main() {
-
-// 	reader := bufio.NewReader(os.Stdin)
-// 	for {
-// 		fmt.Print("$ ")
-
-// 		// Read the input from the user
-// 		input, err := reader.ReadString('\n')
-// 		// var b []byte = make([]byte, 1)
-// 		// bufferInput := ""
-// 		// for {
-// 		// 	os.Stdin.Read(b)
-// 		// 	bufferInput += string(b)
-// 		// 	// strings.Join(bufferInput, "")
-
-// 		// 	// switch b {
-// 		// 	// case "\x1b[A":
-// 		// 	// 	// Up arrow key => ([A
-// 		// 	// 	fmt.Println("UP ARROW KEY")
-// 		// 	// 	os.Exit(1)
-
-// 		// 	// case "\x1b[B":
-// 		// 	// 	// Down arrow key => ([B
-// 		// 	// 	fmt.Println("DOWN ARROW KEY")
-// 		// 	// 	os.Exit(1)
-// 		// 	// }
-// 		// 	// fmt.Println("I got the byte", b, "("+string(b)+")")
-// 		// 	fmt.Println(bufferInput)
-// 		// }
-
-// 		if err != nil {
-// 			fmt.Fprintln(os.Stderr, err)
-// 		}
-
-// 		// Handle the execution of the command
-// 		if err = execInput(input); err != nil {
-// 			fmt.Fprintln(os.Stderr, err)
-// 		}
-// 	}
-// }
 
 // Function to esxecute the command
 // func executeCommand(command string) {
