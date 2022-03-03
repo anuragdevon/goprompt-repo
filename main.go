@@ -23,28 +23,22 @@ func editGashHistory(input string) {
 	check(errW)
 }
 
-func readGashHistory() {
+func readGashHistory() string {
 	f, err := os.OpenFile("gash_history.log", os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 	// count := 0
 
 	rd := bufio.NewReader(f)
-	// for _, err := rd.ReadString('\n'); err != io.EOF; _, err = rd.ReadString('\n') {
-	// 	// lastLineSize := len(line)
-	// 	// fmt.Print(lastLineSize)
-	// 	count += 1
-	// 	// break
-	// }
 	i := 0
-	lineNumber := 2
+	lineNumber := 10
 	for line, err := rd.ReadString('\n'); err != io.EOF; line, err = rd.ReadString('\n') {
 		i += 1
 		if lineNumber == i {
-			fmt.Printf("%s", line)
-
+			return line
 		}
 	}
+	return ""
 }
 
 func main() {
@@ -72,10 +66,13 @@ func main() {
 			if string(c) == string(byte(91)) {
 				if string(d) == string(byte(65)) {
 					// read history
-					readGashHistory()
+					input := readGashHistory()
+					fmt.Printf("%s", input)
 					os.Stdin.Read(con)
-					if string(b) == "\n" {
-						fmt.Print("EXECUTING...")
+					if string(con) == string(byte(10)) {
+						if err = execInput(input); err != nil {
+							fmt.Fprintln(os.Stderr, err)
+						}
 					}
 
 				} else if string(d) == string(byte(66)) {

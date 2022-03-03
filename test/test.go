@@ -42,3 +42,10 @@ func main() {
 // 	// Print the output
 // 	fmt.Print(user)
 // }
+
+// for _, err := rd.ReadString('\n'); err != io.EOF; _, err = rd.ReadString('\n') {
+// 	// lastLineSize := len(line)
+// 	// fmt.Print(lastLineSize)
+// 	count += 1
+// 	// break
+// }
