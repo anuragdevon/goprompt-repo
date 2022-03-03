@@ -10,6 +10,7 @@ import (
 )
 
 var LINE_NUMBER int = 0
+var HIST_FILE string = "gash_history.log"
 
 func check(e error) {
 	if e != nil {
@@ -18,7 +19,7 @@ func check(e error) {
 }
 
 func editGashHistory(input string) {
-	f, err := os.OpenFile("gash_history.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	f, err := os.OpenFile(HIST_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 	_, errW := f.WriteString(input)
@@ -26,7 +27,7 @@ func editGashHistory(input string) {
 }
 
 func readGashHistory(lineNumber int) string {
-	f, err := os.OpenFile("gash_history.log", os.O_RDONLY, os.ModePerm)
+	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 
@@ -42,7 +43,7 @@ func readGashHistory(lineNumber int) string {
 }
 
 func total_lines() int {
-	f, err := os.OpenFile("gash_history.log", os.O_RDONLY, os.ModePerm)
+	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 	count := 0
@@ -61,7 +62,7 @@ func main() {
 	var b []byte = make([]byte, 1)
 	var c []byte = make([]byte, 1)
 	var d []byte = make([]byte, 1)
-	var con []byte = make([]byte, 1)
+	// var con []byte = make([]byte, 1)
 
 	for {
 		// disble chacter display on screen
@@ -82,14 +83,18 @@ func main() {
 				if string(d) == string(byte(65)) {
 					// read history
 					input := readGashHistory(LINE_NUMBER)
-					fmt.Printf("%s", input)
-
-					os.Stdin.Read(con)
-					if string(con) == string(byte(10)) {
-						if err = execInput(input); err != nil {
-							fmt.Fprintln(os.Stderr, err)
-						}
+					input = strings.TrimSuffix(input, "\n")
+					fmt.Print(input)
+					reader := bufio.NewReader(os.Stdin)
+					addtional_input, err := reader.ReadString('\n')
+					check(err)
+					fmt.Println()
+					// if string(con) == string(byte(10)) {
+					input += addtional_input
+					if err = execInput(input); err != nil {
+						fmt.Fprintln(os.Stderr, err)
 					}
+					// }
 
 				} else if string(d) == string(byte(66)) {
 					// read latest
@@ -117,6 +122,7 @@ func main() {
 func execInput(input string) error {
 
 	input = strings.TrimSuffix(input, "\n")
+
 	args := strings.Split(input, " ")
 
 	switch args[0] {
