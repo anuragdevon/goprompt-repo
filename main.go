@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var LINE_NUMBER int = 0
+
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -23,15 +25,13 @@ func editGashHistory(input string) {
 	check(errW)
 }
 
-func readGashHistory() string {
+func readGashHistory(lineNumber int) string {
 	f, err := os.OpenFile("gash_history.log", os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
-	// count := 0
 
 	rd := bufio.NewReader(f)
 	i := 0
-	lineNumber := 10
 	for line, err := rd.ReadString('\n'); err != io.EOF; line, err = rd.ReadString('\n') {
 		i += 1
 		if lineNumber == i {
@@ -39,6 +39,19 @@ func readGashHistory() string {
 		}
 	}
 	return ""
+}
+
+func total_lines() int {
+	f, err := os.OpenFile("gash_history.log", os.O_RDONLY, os.ModePerm)
+	check(err)
+	defer f.Close()
+	count := 0
+
+	rd := bufio.NewReader(f)
+	for _, err := rd.ReadString('\n'); err != io.EOF; _, err = rd.ReadString('\n') {
+		count += 1
+	}
+	return count
 }
 
 func main() {
@@ -63,11 +76,14 @@ func main() {
 		if string(b) == string(byte(27)) {
 			os.Stdin.Read(c)
 			os.Stdin.Read(d)
+			LINE_NUMBER = total_lines()
+
 			if string(c) == string(byte(91)) {
 				if string(d) == string(byte(65)) {
 					// read history
-					input := readGashHistory()
+					input := readGashHistory(LINE_NUMBER)
 					fmt.Printf("%s", input)
+
 					os.Stdin.Read(con)
 					if string(con) == string(byte(10)) {
 						if err = execInput(input); err != nil {
@@ -77,7 +93,7 @@ func main() {
 
 				} else if string(d) == string(byte(66)) {
 					// read latest
-					readGashHistory()
+					readGashHistory(LINE_NUMBER)
 				}
 			}
 		} else {
