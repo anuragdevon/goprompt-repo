@@ -6,7 +6,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 var LINE_NUMBER int = 0
@@ -28,6 +30,30 @@ func promt() {
 	colorBlue := "\033[34m"
 	colorReset := "\033[0m"
 	fmt.Print(string(colorBlue), path, string(colorGreen), " > ", string(colorReset))
+}
+
+func unixSignals() {
+	signalChanel := make(chan os.Signal, 1)
+	signal.Notify(signalChanel,
+		syscall.SIGINT)
+
+	exit_chan := make(chan int)
+	go func() {
+		for {
+			s := <-signalChanel
+			fmt.Println("Signal Received: ", s)
+			switch s {
+			case syscall.SIGINT:
+				fmt.Println("Signal interrupt triggered.")
+
+			default:
+				fmt.Println("Unknown signal.")
+				exit_chan <- 1
+			}
+		}
+	}()
+	exitCode := <-exit_chan
+	os.Exit(exitCode)
 }
 
 func editGashHistory(input string) {
@@ -189,5 +215,6 @@ func main() {
 		promt()
 		os.Stdin.Read(b)
 		decisionTree(b, executionStatus, prevCommand)
+		// unixSignals()
 	}
 }
