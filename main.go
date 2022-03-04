@@ -12,10 +12,19 @@ import (
 var LINE_NUMBER int = 0
 var HIST_FILE string = "gash_history.log"
 
+const ClearLine = "\n\033[1A\033[K"
+
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func promt() {
+	path, err := os.Getwd()
+	check(err)
+	path = strings.Replace(string(path), "/home/anurag", "~", 1)
+	fmt.Print(path, " > ")
 }
 
 func editGashHistory(input string) {
@@ -55,55 +64,77 @@ func total_lines() int {
 	return count
 }
 
-func decisionTree(b []byte) {
-	var c []byte = make([]byte, 1)
-	var d []byte = make([]byte, 1)
+func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
+	if !executionStatus {
+		var c []byte = make([]byte, 1)
+		var d []byte = make([]byte, 1)
 
-	if string(b) == string(byte(27)) {
-		os.Stdin.Read(c)
-		os.Stdin.Read(d)
+		if string(b) == string(byte(27)) {
+			os.Stdin.Read(c)
+			os.Stdin.Read(d)
 
-		if string(c) == string(byte(91)) {
-			if string(d) == string(byte(65)) {
-				LINE_NUMBER -= 1
-				// read history
-				input := readGashHistory(LINE_NUMBER)
-				input = strings.TrimSuffix(input, "\n")
-				fmt.Print("\n\033[1A\033[K")
-				promt()
-				fmt.Print(input)
-				os.Stdin.Read(b)
-				// recursive
-				decisionTree(b)
+			if string(c) == string(byte(91)) {
+				if string(d) == string(byte(65)) {
+					// read history
+					LINE_NUMBER -= 1
+					input := readGashHistory(LINE_NUMBER)
+					input = strings.TrimSuffix(input, "\n")
+					fmt.Print(ClearLine)
+					promt()
+					fmt.Print(input)
+					prevCommand = input
+					os.Stdin.Read(b)
+
+					executionStatus = decisionTree(b, executionStatus, prevCommand)
+
+				} else if string(d) == string(byte(66)) {
+					// read latest
+					LINE_NUMBER += 1
+					input := readGashHistory(LINE_NUMBER)
+					input = strings.TrimSuffix(input, "\n")
+					fmt.Print(ClearLine)
+					promt()
+					fmt.Print(input)
+					prevCommand = input
+					os.Stdin.Read(b)
+
+					executionStatus = decisionTree(b, executionStatus, prevCommand)
+				}
+			}
+		} else {
+			input := ""
+			if prevCommand == "" {
+				fmt.Print(string(b))
+
+				// Enable chacter display on screen
+				exec.Command("stty", "-F", "/dev/tty", "echo").Run()
 				reader := bufio.NewReader(os.Stdin)
-				addtional_input, err := reader.ReadString('\n')
+				input, err := reader.ReadString('\n')
 				check(err)
-				fmt.Println()
-				input += addtional_input
+				input = string(b) + input
+
+				editGashHistory(input)
+				executionStatus = true
+
 				if err = execInput(input); err != nil {
 					fmt.Fprintln(os.Stderr, err)
 				}
 
-			} else if string(d) == string(byte(66)) {
-				// read latest
-				readGashHistory(LINE_NUMBER)
+			} else {
+				fmt.Print(string(b))
+				input = prevCommand + string(b)
+
+				editGashHistory(input)
+				executionStatus = true
+
+				if err := execInput(input); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+				}
 			}
-		}
-	} else {
-		fmt.Print(string(b))
 
-		// Enable chacter display on screen
-		exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-		reader := bufio.NewReader(os.Stdin)
-		input, err := reader.ReadString('\n')
-		check(err)
-		input = string(b) + input
-		editGashHistory(input)
-
-		if err = execInput(input); err != nil {
-			fmt.Fprintln(os.Stderr, err)
 		}
 	}
+	return executionStatus
 }
 
 func execInput(input string) error {
@@ -134,24 +165,18 @@ func execInput(input string) error {
 	return cmd.Run()
 }
 
-func promt() {
-	path, err := os.Getwd()
-	check(err)
-	path = strings.Replace(string(path), "/home/anurag", "~", 1)
-	fmt.Print(path, " > ")
-}
-
 func main() {
 	// disable input buffering
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 	var b []byte = make([]byte, 1)
-	promt()
+	executionStatus := false
 	for {
 		// disble chacter display on screen
 		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
 		LINE_NUMBER = total_lines() + 1
-
+		prevCommand := ""
+		promt()
 		os.Stdin.Read(b)
-		decisionTree(b)
+		decisionTree(b, executionStatus, prevCommand)
 	}
 }
