@@ -6,55 +6,61 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"os/signal"
+
+	// "os/signal"
 	"strings"
-	"syscall"
+	// "syscall"
+
+	"github.com/ttacon/chalk"
 )
 
 var LINE_NUMBER int = 0
-var HIST_FILE string = "gash_history.log"
+var HIST_FILE string = "/home/anurag/docs/gash/gash_history.log"
 
 const ClearLine = "\n\033[1A\033[K"
 
 func check(e error) {
 	if e != nil {
-		panic(e)
+		// panic(e)
+		fmt.Println(e)
 	}
 }
-
 func promt() {
+	hostname, err := os.Hostname()
+	// os.
+	check(err)
 	path, err := os.Getwd()
 	check(err)
 	path = strings.Replace(string(path), "/home/anurag", "~", 1)
-	colorGreen := "\033[32m"
-	colorBlue := "\033[34m"
-	colorReset := "\033[0m"
-	fmt.Print(string(colorBlue), path, string(colorGreen), " > ", string(colorReset))
+	CyanSt := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).WithBackground(chalk.ResetColor)
+	GreenSt := chalk.Blue.NewStyle().WithTextStyle(chalk.Italic).WithBackground(chalk.ResetColor)
+	MagentaSt := chalk.Magenta.NewStyle().WithTextStyle(chalk.Bold).WithBackground(chalk.ResetColor)
+	fmt.Print(CyanSt.Style(path), "(", GreenSt.Style(hostname), ")", MagentaSt.Style(" > "))
 }
 
-func unixSignals() {
-	signalChanel := make(chan os.Signal, 1)
-	signal.Notify(signalChanel,
-		syscall.SIGINT)
+// func unixSignals() {
+// 	signalChanel := make(chan os.Signal, 1)
+// 	signal.Notify(signalChanel,
+// 		syscall.SIGINT)
 
-	exit_chan := make(chan int)
-	go func() {
-		for {
-			s := <-signalChanel
-			fmt.Println("Signal Received: ", s)
-			switch s {
-			case syscall.SIGINT:
-				fmt.Println("Signal interrupt triggered.")
+// 	exit_chan := make(chan int)
+// 	go func() {
+// 		for {
+// 			s := <-signalChanel
+// 			fmt.Println("Signal Received: ", s)
+// 			switch s {
+// 			case syscall.SIGINT:
+// 				fmt.Println("Signal interrupt triggered.")
 
-			default:
-				fmt.Println("Unknown signal.")
-				exit_chan <- 1
-			}
-		}
-	}()
-	exitCode := <-exit_chan
-	os.Exit(exitCode)
-}
+// 			default:
+// 				fmt.Println("Unknown signal.")
+// 				exit_chan <- 1
+// 			}
+// 		}
+// 	}()
+// 	exitCode := <-exit_chan
+// 	os.Exit(exitCode)
+// }
 
 func editGashHistory(input string) {
 	f, err := os.OpenFile(HIST_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
@@ -183,13 +189,12 @@ func execInput(input string) error {
 	switch args[0] {
 	case "cd":
 		// 'cd' to home dir with empty path not yet supported.
-		if len(args) < 2 {
+		if len(args) < 2 || args[1] == "" {
 			dir := "/home/" + "anurag"
 			return os.Chdir(dir)
 		}
 		// Change the directory and return the error
 		return os.Chdir(args[1])
-
 	case "exit":
 		os.Exit(0)
 	}
