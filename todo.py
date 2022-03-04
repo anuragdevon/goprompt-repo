@@ -8,3 +8,4 @@
 # TODO: implement cttl+l to clear
 # TODO: Backspace enable + del enable
 # TODO: double \n logical error
+# TODO: History add new commands continue recursice until last

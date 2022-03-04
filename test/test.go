@@ -6,6 +6,11 @@ import (
 	"os/exec"
 )
 
+// func main() {
+// 	fmt.Println("Test 1")
+// 	fmt.Println("Test 2")
+// 	fmt.Print("\033[1A\033[K") //one up, remove line (should work after the newline of the Println)
+// }
 func main() {
 	// disable input buffering
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()

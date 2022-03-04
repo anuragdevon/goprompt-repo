@@ -55,66 +55,53 @@ func total_lines() int {
 	return count
 }
 
-func main() {
-	// disable input buffering
-	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-
-	var b []byte = make([]byte, 1)
+func decisionTree(b []byte) {
 	var c []byte = make([]byte, 1)
 	var d []byte = make([]byte, 1)
-	// var con []byte = make([]byte, 1)
 
-	for {
-		// disble chacter display on screen
-		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-		path, err := os.Getwd()
-		if err != nil {
-			fmt.Println(err)
-		}
-		path = strings.Replace(string(path), "/home/anurag", "~", 1)
-		fmt.Print(path, " > ")
-		os.Stdin.Read(b)
-		if string(b) == string(byte(27)) {
-			os.Stdin.Read(c)
-			os.Stdin.Read(d)
-			LINE_NUMBER = total_lines()
+	if string(b) == string(byte(27)) {
+		os.Stdin.Read(c)
+		os.Stdin.Read(d)
 
-			if string(c) == string(byte(91)) {
-				if string(d) == string(byte(65)) {
-					// read history
-					input := readGashHistory(LINE_NUMBER)
-					input = strings.TrimSuffix(input, "\n")
-					fmt.Print(input)
-					reader := bufio.NewReader(os.Stdin)
-					addtional_input, err := reader.ReadString('\n')
-					check(err)
-					fmt.Println()
-					// if string(con) == string(byte(10)) {
-					input += addtional_input
-					if err = execInput(input); err != nil {
-						fmt.Fprintln(os.Stderr, err)
-					}
-					// }
-
-				} else if string(d) == string(byte(66)) {
-					// read latest
-					readGashHistory(LINE_NUMBER)
+		if string(c) == string(byte(91)) {
+			if string(d) == string(byte(65)) {
+				LINE_NUMBER -= 1
+				// read history
+				input := readGashHistory(LINE_NUMBER)
+				input = strings.TrimSuffix(input, "\n")
+				fmt.Print("\n\033[1A\033[K")
+				promt()
+				fmt.Print(input)
+				os.Stdin.Read(b)
+				// recursive
+				decisionTree(b)
+				reader := bufio.NewReader(os.Stdin)
+				addtional_input, err := reader.ReadString('\n')
+				check(err)
+				fmt.Println()
+				input += addtional_input
+				if err = execInput(input); err != nil {
+					fmt.Fprintln(os.Stderr, err)
 				}
-			}
-		} else {
-			fmt.Print(string(b))
 
-			// Enable chacter display on screen
-			exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-			reader := bufio.NewReader(os.Stdin)
-			input, err := reader.ReadString('\n')
-			check(err)
-			input = string(b) + input
-			editGashHistory(input)
-
-			if err = execInput(input); err != nil {
-				fmt.Fprintln(os.Stderr, err)
+			} else if string(d) == string(byte(66)) {
+				// read latest
+				readGashHistory(LINE_NUMBER)
 			}
+		}
+	} else {
+		fmt.Print(string(b))
+
+		// Enable chacter display on screen
+		exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
+		check(err)
+		input = string(b) + input
+		editGashHistory(input)
+
+		if err = execInput(input); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 }
@@ -145,4 +132,26 @@ func execInput(input string) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func promt() {
+	path, err := os.Getwd()
+	check(err)
+	path = strings.Replace(string(path), "/home/anurag", "~", 1)
+	fmt.Print(path, " > ")
+}
+
+func main() {
+	// disable input buffering
+	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+	var b []byte = make([]byte, 1)
+	promt()
+	for {
+		// disble chacter display on screen
+		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+		LINE_NUMBER = total_lines() + 1
+
+		os.Stdin.Read(b)
+		decisionTree(b)
+	}
 }
