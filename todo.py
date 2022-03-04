@@ -9,3 +9,5 @@
 # TODO: Backspace enable + del enable
 # TODO: double \n logical error
 # TODO: History add new commands continue recursice until last
+# TODO: read characters continuously for next history time
+# TODO: remove the extra \n while history reading

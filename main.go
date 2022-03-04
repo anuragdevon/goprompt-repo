@@ -24,7 +24,10 @@ func promt() {
 	path, err := os.Getwd()
 	check(err)
 	path = strings.Replace(string(path), "/home/anurag", "~", 1)
-	fmt.Print(path, " > ")
+	colorGreen := "\033[32m"
+	colorBlue := "\033[34m"
+	colorReset := "\033[0m"
+	fmt.Print(string(colorBlue), path, string(colorGreen), " > ", string(colorReset))
 }
 
 func editGashHistory(input string) {
@@ -123,6 +126,14 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 			} else {
 				fmt.Print(string(b))
 				input = prevCommand + string(b)
+				// input = strings.TrimSuffix(input, "\n")
+				// // Enable chacter display on screen
+				// exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+				// reader := bufio.NewReader(os.Stdin)
+				// extra_input, err := reader.ReadString('\n')
+				// check(err)
+
+				// input = input + extra_input
 
 				editGashHistory(input)
 				executionStatus = true
