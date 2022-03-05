@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"gash/globals"
 )
 
 func check(e error) {
@@ -14,10 +16,8 @@ func check(e error) {
 	}
 }
 
-var HIST_FILE string = "/home/anurag/docs/gash/history/gash_history.log"
-
 func EditGashHistory(input string) {
-	f, err := os.OpenFile(HIST_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	f, err := os.OpenFile(globals.HIST_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 	_, errW := f.WriteString(input)
@@ -25,7 +25,7 @@ func EditGashHistory(input string) {
 }
 
 func ReadGashHistory(lineNumber int) string {
-	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
+	f, err := os.OpenFile(globals.HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 
@@ -41,7 +41,7 @@ func ReadGashHistory(lineNumber int) string {
 }
 
 func FileLines() int {
-	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
+	f, err := os.OpenFile(globals.HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
 	count := 0

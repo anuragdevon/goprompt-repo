@@ -7,13 +7,11 @@ import (
 	"os/exec"
 	"strings"
 
+	"gash/globals"
 	"gash/history"
 	"gash/prompt"
+	"gash/unixSignals"
 )
-
-var lineNumber int = 0
-
-const ClearLine = "\n\033[1A\033[K"
 
 func check(e error) {
 	if e != nil {
@@ -34,10 +32,10 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 			if string(c) == string(byte(91)) {
 				if string(d) == string(byte(65)) {
 					// read history
-					lineNumber -= 1
-					input := history.ReadGashHistory(lineNumber)
+					globals.LineNumber -= 1
+					input := history.ReadGashHistory(globals.LineNumber)
 					input = strings.TrimSuffix(input, "\n")
-					fmt.Print(ClearLine)
+					fmt.Print(globals.ClearLine)
 					prompt.Prompt()
 					fmt.Print(input)
 					prevCommand = input
@@ -47,10 +45,10 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 
 				} else if string(d) == string(byte(66)) {
 					// read latest
-					lineNumber += 1
-					input := history.ReadGashHistory(lineNumber)
+					globals.LineNumber += 1
+					input := history.ReadGashHistory(globals.LineNumber)
 					input = strings.TrimSuffix(input, "\n")
-					fmt.Print(ClearLine)
+					fmt.Print(globals.ClearLine)
 					prompt.Prompt()
 					fmt.Print(input)
 					prevCommand = input
@@ -140,11 +138,14 @@ func main() {
 	for {
 		// disble chacter display on screen
 		// exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-		lineNumber = history.FileLines() + 1
+		globals.LineNumber = history.FileLines() + 1
 		prevCommand := ""
 		prompt.Prompt()
+
+		// Invoke Unix Signals Handler
+		go unixSignals.SingHandler()
+
 		os.Stdin.Read(b)
 		decisionTree(b, executionStatus, prevCommand)
-		// unixSignals()
 	}
 }
