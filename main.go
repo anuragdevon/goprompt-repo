@@ -68,7 +68,7 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 				exec.Command("stty", "-F", "/dev/tty", "echo").Run()
 				reader := bufio.NewReader(os.Stdin)
 				input, err := reader.ReadString('\n')
-				// fmt.Print("\b")
+
 				check(err)
 				input = string(b) + input
 

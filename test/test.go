@@ -16,6 +16,6 @@ func main() {
 	var b []byte = make([]byte, 1)
 	for {
 		os.Stdin.Read(b)
-		fmt.Println("I got the byte", b, "("+string(b)+")")
+		fmt.Println("Current Byte: ", b, "("+string(b)+")")
 	}
 }
