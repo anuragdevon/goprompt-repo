@@ -1,4 +1,4 @@
-package promt
+package prompt
 
 import (
 	"fmt"
