@@ -15,7 +15,7 @@ func check(e error) {
 	}
 }
 
-func promt() {
+func Prompt() {
 	hostname, err := os.Hostname()
 	// os.
 	check(err)

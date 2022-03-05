@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	// "os/signal"
 	"strings"
-	// "syscall"
+
+	"gash/history"
+	"gash/prompt"
 )
 
 var LINE_NUMBER int = 0
@@ -35,10 +35,10 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 				if string(d) == string(byte(65)) {
 					// read history
 					LINE_NUMBER -= 1
-					input := readGashHistory(LINE_NUMBER)
+					input := history.ReadGashHistory(LINE_NUMBER)
 					input = strings.TrimSuffix(input, "\n")
 					fmt.Print(ClearLine)
-					promt()
+					prompt.Prompt()
 					fmt.Print(input)
 					prevCommand = input
 					os.Stdin.Read(b)
@@ -48,10 +48,10 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 				} else if string(d) == string(byte(66)) {
 					// read latest
 					LINE_NUMBER += 1
-					input := readGashHistory(LINE_NUMBER)
+					input := history.ReadGashHistory(LINE_NUMBER)
 					input = strings.TrimSuffix(input, "\n")
 					fmt.Print(ClearLine)
-					promt()
+					prompt.Prompt()
 					fmt.Print(input)
 					prevCommand = input
 					os.Stdin.Read(b)
@@ -72,7 +72,7 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 				check(err)
 				input = string(b) + input
 
-				editGashHistory(input)
+				history.EditGashHistory(input)
 				executionStatus = true
 
 				if err = execInput(input); err != nil {
@@ -91,7 +91,7 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 
 				// input = input + extra_input
 
-				editGashHistory(input)
+				history.EditGashHistory(input)
 				executionStatus = true
 
 				if err := execInput(input); err != nil {
@@ -140,9 +140,9 @@ func main() {
 	for {
 		// disble chacter display on screen
 		// exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-		LINE_NUMBER = total_lines() + 1
+		LINE_NUMBER = history.FileLines() + 1
 		prevCommand := ""
-		promt()
+		prompt.Prompt()
 		os.Stdin.Read(b)
 		decisionTree(b, executionStatus, prevCommand)
 		// unixSignals()

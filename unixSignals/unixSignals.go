@@ -1,4 +1,4 @@
-package singalhandler
+package unixSignals
 
 import (
 	"fmt"

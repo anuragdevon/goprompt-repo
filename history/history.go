@@ -16,7 +16,7 @@ func check(e error) {
 
 var HIST_FILE string = "/home/anurag/docs/gash/history/gash_history.log"
 
-func editGashHistory(input string) {
+func EditGashHistory(input string) {
 	f, err := os.OpenFile(HIST_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
@@ -24,7 +24,7 @@ func editGashHistory(input string) {
 	check(errW)
 }
 
-func readGashHistory(lineNumber int) string {
+func ReadGashHistory(lineNumber int) string {
 	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
@@ -40,7 +40,7 @@ func readGashHistory(lineNumber int) string {
 	return ""
 }
 
-func total_lines() int {
+func FileLines() int {
 	f, err := os.OpenFile(HIST_FILE, os.O_RDONLY, os.ModePerm)
 	check(err)
 	defer f.Close()
