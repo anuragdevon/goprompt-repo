@@ -11,7 +11,7 @@ import (
 	"gash/prompt"
 )
 
-var LINE_NUMBER int = 0
+var lineNumber int = 0
 
 const ClearLine = "\n\033[1A\033[K"
 
@@ -34,8 +34,8 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 			if string(c) == string(byte(91)) {
 				if string(d) == string(byte(65)) {
 					// read history
-					LINE_NUMBER -= 1
-					input := history.ReadGashHistory(LINE_NUMBER)
+					lineNumber -= 1
+					input := history.ReadGashHistory(lineNumber)
 					input = strings.TrimSuffix(input, "\n")
 					fmt.Print(ClearLine)
 					prompt.Prompt()
@@ -47,8 +47,8 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 
 				} else if string(d) == string(byte(66)) {
 					// read latest
-					LINE_NUMBER += 1
-					input := history.ReadGashHistory(LINE_NUMBER)
+					lineNumber += 1
+					input := history.ReadGashHistory(lineNumber)
 					input = strings.TrimSuffix(input, "\n")
 					fmt.Print(ClearLine)
 					prompt.Prompt()
@@ -140,7 +140,7 @@ func main() {
 	for {
 		// disble chacter display on screen
 		// exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-		LINE_NUMBER = history.FileLines() + 1
+		lineNumber = history.FileLines() + 1
 		prevCommand := ""
 		prompt.Prompt()
 		os.Stdin.Read(b)
