@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"gash/globals"
 	"gash/history"
@@ -73,28 +74,40 @@ func decisionTree(b []byte, executionStatus bool, prevCommand string) bool {
 				history.EditGashHistory(input)
 				executionStatus = true
 
-				if err = execInput(input); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-				}
-
-			} else {
-				fmt.Print(string(b))
-				input = prevCommand + string(b)
-				// input = strings.TrimSuffix(input, "\n")
-				// // Enable chacter display on screen
-				// exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-				// reader := bufio.NewReader(os.Stdin)
-				// extra_input, err := reader.ReadString('\n')
-				// check(err)
-
-				// input = input + extra_input
-
-				history.EditGashHistory(input)
-				executionStatus = true
+				t1 := time.Now()
 
 				if err := execInput(input); err != nil {
 					fmt.Fprintln(os.Stderr, err)
 				}
+
+				t2 := time.Now()
+				diff := t2.Sub(t1)
+				fmt.Println("time elapsed: ", diff)
+
+			} else {
+				fmt.Print(string(b))
+				input = prevCommand + string(b)
+				input = strings.TrimSuffix(input, "\n")
+				// Enable chacter display on screen
+				exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+				reader := bufio.NewReader(os.Stdin)
+				extra_input, err := reader.ReadString('\n')
+				check(err)
+
+				input = input + extra_input
+
+				history.EditGashHistory(input)
+				executionStatus = true
+
+				t1 := time.Now()
+
+				if err := execInput(input); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+				}
+
+				t2 := t1.Add(time.Second * 341)
+				diff := t2.Sub(t1)
+				fmt.Println("time elapsed: ", diff)
 			}
 
 		}
@@ -132,12 +145,12 @@ func execInput(input string) error {
 func main() {
 	// disable input buffering
 	// TODO: check validity of this
-	// exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 	var b []byte = make([]byte, 1)
 	executionStatus := false
 	for {
 		// disble chacter display on screen
-		// exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
 		globals.LineNumber = history.FileLines() + 1
 		prevCommand := ""
 		prompt.Prompt()
