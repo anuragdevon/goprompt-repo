@@ -25,6 +25,7 @@ func SingHandler() {
 			fmt.Println()
 			fmt.Print(globals.ClearLine)
 			prompt.Prompt()
+			continue
 
 			// default:
 			// 	fmt.Println("Unknown signal.")
